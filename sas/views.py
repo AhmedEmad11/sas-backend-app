@@ -21,6 +21,22 @@ from rest_framework.permissions import IsAuthenticated
 
 
 @api_view(['GET'])
+def overview(request):
+    res = {
+        "Route": "Description",
+        "POST login": "send username & password for login",
+        "POST AUTHED logout": "logout",
+        "GET AUTHED getSubjectAttendance/<int:subject>/": "get the attendance for a single subject",
+        "POST AUTHED markAttendance/": "send subjectId & studentId to mark attendance",
+        "GET AUTHED getProfile": "get the current user profile",
+        "GET AUTHED getSubject": "get the current user subjects",
+        "GET AUTHED getLevels": "get the current user levels if the user is doctor or admin",
+        "GET AUTHED getLevelSubjects/<int:level>/": "get the subjects of a single level"
+    }
+    return Response(res)
+
+
+@api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getSubjectAttendance(request, subject):

@@ -8,12 +8,14 @@ from .views import (
     getSubject,
     logout,
     getLevels,
-    getLevelSubjects
+    getLevelSubjects,
+    overview
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
 
-urlpatterns = [  
+urlpatterns = [
+    path("", overview, name="overview"),  
     path('login', obtain_auth_token, name='login'),
     path('logout', logout, name='logout'),
     path('getSubjectAttendance/<int:subject>/', getSubjectAttendance, name="getSubjectAttendance"),
