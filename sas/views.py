@@ -32,7 +32,8 @@ def overview(request):
         "GET AUTHED getProfile": "get the current user profile",
         "GET AUTHED getSubject": "get the current user subjects",
         "GET AUTHED getLevels": "get the current user levels if the user is doctor or admin",
-        "GET AUTHED getLevelSubjects/<int:level>/": "get the subjects of a single level"
+        "GET AUTHED getLevelSubjects/<int:level>/": "get the subjects of a single level",
+        "GET AUTHED getLevelStudents/<int:level>/": "get the students of a single level"
     }
     return Response(res)
 
