@@ -9,7 +9,8 @@ from .views import (
     logout,
     getLevels,
     getLevelSubjects,
-    overview
+    overview,
+    getLevelStudents
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -23,5 +24,6 @@ urlpatterns = [
     path('getProfile', getProfile, name='getProfile'),
     path('getSubject', getSubject, name='getSubject'),
     path('getLevels', getLevels, name='getLevels'),
-    path('getLevelSubjects/<int:level>/', getLevelSubjects, name='getLevelSubjects')
+    path('getLevelSubjects/<int:level>/', getLevelSubjects, name='getLevelSubjects'),
+    path('getLevelStudents/<int:level>/', getLevelStudents, name='getLevelStudents')
 ]

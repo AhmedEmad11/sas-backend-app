@@ -1,10 +1,11 @@
 from .serializers import (
-    AttendanceSerializer, LevelSerializer, SubjectSerializer
+    AttendanceSerializer, LevelSerializer, RoleSerializer, SubjectSerializer
 )
 
 from .models import (
     Attendance,
-    Level, 
+    Level,
+    Role, 
     Subject
 )
 
@@ -34,6 +35,20 @@ def overview(request):
         "GET AUTHED getLevelSubjects/<int:level>/": "get the subjects of a single level"
     }
     return Response(res)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getLevelStudents(request, level):
+    role = request.user.role.role
+    if role == 'doctor' or role == 'admin':
+        students = Role.objects.filter(level=level)
+        serializer = RoleSerializer(students, many=True)
+        return Response(serializer.data)
+    else:
+        return Response("students can't use this route")
+        
 
 
 @api_view(['GET'])

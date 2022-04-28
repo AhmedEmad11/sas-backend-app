@@ -23,7 +23,8 @@ class AttendanceSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = '__all__'
+        fields = ['id', 'username', 'role', 'level']
+    username= serializers.CharField(source="user.username")
         
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
