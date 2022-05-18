@@ -14,7 +14,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
-        fields = ['id', 'studentId', 'count']
+        fields = ['id', 'subjectId', 'count']
         
 class UserSerializer(serializers.ModelSerializer):
     attendance = serializers.SerializerMethodField()
