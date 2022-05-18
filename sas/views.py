@@ -1,15 +1,13 @@
 from .serializers import (
-    AttendanceSerializer, LevelSerializer, RoleSerializer, SubjectSerializer
+    LevelSerializer, SubjectSerializer, UserSerializer
 )
 
 from .models import (
     Attendance,
+    User,
     Level,
-    Role, 
     Subject
 )
-
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import (
     api_view, 
@@ -42,44 +40,39 @@ def overview(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getLevelStudents(request, level):
-    role = request.user.role.role
+    role = request.user.role
     if role == 'doctor' or role == 'admin':
-        students = Role.objects.filter(level=level)
-        serializer = RoleSerializer(students, many=True)
+        students = User.objects.filter(level=level)
+        serializer = UserSerializer(students, many=True)
         return Response(serializer.data)
     else:
         return Response("students can't use this route")
         
 
-
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def getSubjectAttendance(request, subject):
+def getSubjectAttendance(request, level, subject):
     id = request.user.id
-    role = request.user.role.role
+    role = request.user.role
+    subject = get_object_or_404(Subject, id=subject)
     if role == 'doctor':
-        ids = []
-        subjects = Subject.objects.filter(doctor=id)
-        for i in range(len(subjects)):
-            ids.append(subjects[i].id)
-        if subject in ids:
-            queryset = Attendance.objects.filter(subjectId=subject)
-            serializer = AttendanceSerializer(queryset, many=True)
+        if subject.doctor.id == id:
+            queryset = User.objects.filter(level=level)
+            serializer = UserSerializer(queryset, many=True, context={'subjectId':subject.id})
             return Response(serializer.data)
         else:
             return Response("this doctor does not teach this subject")
     elif role == 'student':
-        sub = get_object_or_404(Subject, id=subject)
-        if sub.level == request.user.role.level:
-            queryset = Attendance.objects.filter(subjectId=subject, studentId=id)
-            serializer = AttendanceSerializer(queryset, many=True)
+        if subject.level == request.user.level:
+            queryset = User.objects.filter(id=id)
+            serializer = UserSerializer(queryset, many=True, context={'subjectId':subject.id})
             return Response(serializer.data)
         else:
             return Response("this student does not take this subject")
     else:
-        queryset = Attendance.objects.filter(subjectId=subject)
-        serializer = AttendanceSerializer(queryset, many=True)
+        queryset = User.objects.filter(level=level)
+        serializer = UserSerializer(queryset, many=True, context={'subjectId':subject.id})
         return Response(serializer.data)
 
 
@@ -89,11 +82,15 @@ def getSubjectAttendance(request, subject):
 def markAttendance(request):
     studentId = request.data["studentId"]
     subjectId = request.data["subjectId"]
+    
+    if request.user.role == "student":
+        return Response("only doctors and admins can use this route")
+
     student = get_object_or_404(User, id=studentId)
-    role = student.role.role
+    role = student.role
     if role == 'student':
         sub = get_object_or_404(Subject, id=subjectId)
-        if sub.level == student.role.level:
+        if sub.level == student.level:
             attendance, created = Attendance.objects.get_or_create(subjectId=sub, studentId=student)
             attendance.count += 1
             attendance.save()            
@@ -108,30 +105,20 @@ def markAttendance(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getProfile(request):
-    user = request.user
-    res = {
-        "id": user.id,
-        "username": user.username,
-        "firstname": user.first_name,
-        "lastname": user.last_name,
-        "role": user.role.role,
-        "levelName": "none",
-        "levelId": "none"
-    }
-    if user.role.level != None:
-        res["levelName"] = user.role.level.name
-        res["levelId"] = user.role.level.id
-    return Response(res)
+    id = request.user.id
+    query = User.objects.get(id=id)
+    serializer = UserSerializer(query)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def getSubject(request):
+def getSubjects(request):
     id = request.user.id
-    role = request.user.role.role
+    role = request.user.role
     if role == 'student':
-        subjects = Subject.objects.filter(level=request.user.role.level)
+        subjects = Subject.objects.filter(level=request.user.level)
         serializer = SubjectSerializer(subjects, many=True)
         return Response(serializer.data)
     elif role == 'doctor':
@@ -143,17 +130,19 @@ def getSubject(request):
         serializer = SubjectSerializer(subjects, many=True)
         return Response(serializer.data)
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getLevels(request):
     id = request.user.id
-    role = request.user.role.role
+    role = request.user.role
     levels = []
     if role == "doctor":
         subjects = Subject.objects.filter(doctor=id)
         for i in range(len(subjects)):
-            levels.append(subjects[i].level)
+            if subjects[i].level not in levels:
+                levels.append(subjects[i].level)
         serializer = LevelSerializer(levels, many=True)
         return Response(serializer.data)
 
@@ -164,12 +153,13 @@ def getLevels(request):
     else:
         return Response("only doctors and admins can user this route")
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getLevelSubjects(request, level):
     id = request.user.id
-    role = request.user.role.role
+    role = request.user.role
     if role == "doctor":
         subjects = Subject.objects.filter(doctor=id, level=level)
         serializer = SubjectSerializer(subjects, many=True)
@@ -181,9 +171,35 @@ def getLevelSubjects(request, level):
     else:
         return Response('only doctors and admins can user this route')
 
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def logout(request):
     request.user.auth_token.delete()
     return Response("user logged out")
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def createAttendanceForLevel(request):
+    level = request.data["levelId"]
+    role = request.user.role
+    print(role)
+    if role != "admin":
+        return Response("only admins can use this route")
+    
+    subjects = Subject.objects.filter(level=level)
+    students = User.objects.filter(level=level)
+    
+    counter = 0
+    
+    for student in students:
+        for subject in subjects:
+            attendance, created = Attendance.objects.get_or_create(subjectId=subject, studentId=student)
+            if created:
+                attendance.save()
+                counter +=1
+                
+    return Response(f"created {counter} attendance object/s")

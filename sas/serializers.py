@@ -1,12 +1,10 @@
 from rest_framework import serializers
-from .models import Level, Subject, Attendance, Role
-
-from django.contrib.auth.models import User
+from .models import Level, Subject, Attendance, User
 
 class LevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Level
-        fields = ['id', 'name']
+        fields = '__all__'
         
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,22 +14,24 @@ class SubjectSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
-        fields = ['id', 'studentId', 'subjectId', 'count', 'username', 'firstname', 'lastname']
-    username = serializers.CharField(source='studentId.username')
-    firstname = serializers.CharField(source='studentId.first_name')
-    lastname = serializers.CharField(source='studentId.last_name')
-        
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = ['id', 'username', 'firstname', 'lastname', 'role', 'level']
-    username= serializers.CharField(source="user.username")
-    firstname= serializers.CharField(source="user.first_name")
-    lastname= serializers.CharField(source="user.last_name")
+        fields = ['id', 'studentId', 'count']
         
 class UserSerializer(serializers.ModelSerializer):
+    attendance = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'role']
-    role = serializers.CharField(source='role.role')
+        fields = ['id', 'username', 'first_name', 'last_name', 'role', 'level', 'attendance']      
+
+    def get_attendance(self, obj):
+            att_query = Attendance.objects.filter(
+                studentId=obj.id
+            )
+            if self.context:
+                if self.context["subjectId"]:
+                    att_query = Attendance.objects.filter(
+                    studentId=obj.id, subjectId=self.context['subjectId'])
+                
+            serializer = AttendanceSerializer(att_query, many=True)
     
+            return serializer.data
