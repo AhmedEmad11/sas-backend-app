@@ -4,10 +4,10 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class Level(models.Model):
     LEVELS = [
-        ('L1', 'Level 1'),
-        ('L2', 'Level 2'),
-        ('L3', 'Level 3'),
-        ('L4', 'Level 4')
+        ('Level 1', 'Level 1'),
+        ('Level 2', 'Level 2'),
+        ('Level 3', 'Level 3'),
+        ('Level 4', 'Level 4')
     ]
     
     name = models.CharField(max_length=60, default=LEVELS[0][0], choices=LEVELS)

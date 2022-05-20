@@ -73,6 +73,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:4200',
+  'https://smart-attendance-13c82.web.app',
 )
 
 ROOT_URLCONF = 'src.urls'
