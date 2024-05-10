@@ -1,7 +1,7 @@
 # Smart Attendance System backend API
 
-## Deployed on vercel at <https://sas-backend-app.vercel.app/>
-## Frontend deployed on firebase at <https://smart-attendance-13c82.firebaseapp.com/>
+### Deployed on vercel at <https://sas-backend-app.vercel.app/>
+### Frontend deployed on firebase at <https://smart-attendance-13c82.firebaseapp.com/>
 
 This attendance system allows professors to view student attendance in their subject and allows students to view their own attendance
 
