@@ -1,8 +1,8 @@
 # Smart Attendance System backend API
 
 ### Deployed on vercel at <https://sas-backend-app.vercel.app/>
+### Smart Attedndance System using faical recognition project frontend <https://github.com/AhmedEmad11/sas-frontend-app>
 ### Frontend deployed on firebase at <https://smart-attendance-13c82.firebaseapp.com/>
-### Smart Attedndance System using faical recognition <https://github.com/AhmedEmad11/sas-frontend-app>
 
 This attendance system allows professors to view student attendance in their subject and allows students to view their own attendance
 
