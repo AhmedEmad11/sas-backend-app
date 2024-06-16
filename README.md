@@ -7,7 +7,7 @@
 This attendance system allows professors to view student attendance in their subject and allows students to view their own attendance
 
 Routes and their description:
-  /login Method: POST PROTECTED Description: send username and password for login and get the user token
+  /login Method: POST Description: send username and password for login and get the user token
     usernames and role are assigned by the system admins
     
   /logout Method: POST PROTECTED Description: logout of the system and delete the user token
